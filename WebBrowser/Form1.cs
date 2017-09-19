@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -12,6 +14,7 @@ using System.Windows.Forms;
 
 namespace WebBrowser
 {
+    [ComVisible(true)]
     public partial class Form1 : Form
     {
         public Form1()
@@ -21,6 +24,8 @@ namespace WebBrowser
             this.txtUrl.Text = "http://saishi.cnki.net/passport/Account/Login";
             //this.txtUrl.Text = "http://127.0.0.1/abc.html";
             this.webBrowser.Navigate(this.txtUrl.Text);
+            webBrowser.ObjectForScripting = this;
+            ConfigurationManager.AppSettings["over"] = "0";
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -30,8 +35,27 @@ namespace WebBrowser
 
         private void webBrowser1_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
+            InjectScript();
+            FillAnswer();
+        }
+
+        private void FillAnswer()
+        {
+            HtmlElementCollection htmls = this.webBrowser.Document.GetElementsByTagName("html");
+
+            foreach (HtmlElement item in htmls)
+            {
+                if (item.OuterHtml.Contains("您已完成了所有试题，确定交卷吗？"))
+                {
+                    ConfigurationManager.AppSettings["over"] = "1";
+                    return;
+                }
+            }
+
             string tigan = "";
             string answer = "";
+            string answered = "";
+
             HtmlElementCollection divs = this.webBrowser.Document.GetElementsByTagName("div");
             foreach (HtmlElement item in divs)
             {
@@ -46,21 +70,30 @@ namespace WebBrowser
                     {
                         tigan = item.InnerHtml;
                         answer = GetAnswer(tigan);
-                    }
-                    if (classVal == "iradio_square-green")
-                    {
-                        var inputEle = item.FirstChild;
-                        var inputEleVal = inputEle.GetAttribute("value");
-                        if (inputEle != null && answer.Contains(inputEleVal))
-                        {
-                            Thread.Sleep(1000);
-                            MessageBox.Show("选" + inputEleVal);
-                            inputEle.InvokeMember("click");                           
-                        }
-
+                        richTextBoxQ.Text = tigan;
+                        textBoxA.Text = answer;
+                        MessageBox.Show(tigan + "\r\n" + answer);
+                        break;
                     }
                 }
             }
+            if (string.IsNullOrEmpty(tigan) && DateTime.Parse(ConfigurationManager.AppSettings["currentTime"].ToString()).AddSeconds(1) > DateTime.Now)
+            {
+                FillAnswer();
+            }
+
+            var answerItem = webBrowser.Document.GetElementById("kaoto_Answer");
+            var inputs = answerItem.GetElementsByTagName("input");
+            foreach (HtmlElement innerItem in inputs)
+            {
+                var inputEleVal = innerItem.GetAttribute("value");
+                if (answer.Contains(inputEleVal))
+                {
+                    answered = "true";
+                    innerItem.InvokeMember("click");
+                }
+            }
+
         }
 
         private string GetAnswer(string tigan)
@@ -74,6 +107,7 @@ namespace WebBrowser
             //    return "B";
             //}\
             string[] arr = new[] { "A", "B", "C", "D" };
+            //正确是a，错误是b
             return arr[new Random().Next(0, 4)];
         }
 
@@ -83,14 +117,59 @@ namespace WebBrowser
             HtmlElement ele = this.webBrowser.Document.CreateElement("script");
             ele.SetAttribute("type", "text/javascript");
             ele.SetAttribute("text", @"
+$.ajaxSetup({
+    contentType: 'application/x-www-form-urlencoded;charset=utf-8',
+    complete: function (XMLHttpRequest, textStatus) {
+        
+        window.external.ShowMessage('haha');
+    },
+    beforeSend: function (xhr) {
+        var s = '123';
+    },
+    success: function (result, status, xhr) {
+        var s = '123';
+    }
+});
+
+function PostData(){
+    $.ajax({
+            type: 'GET',
+url: 'http://xushuangapi.qiezzi.com/',
+data: '{}',
+contentType: 'application/json; charset=utf-8',
+dataType: 'json',
+     async: false,
+success: function(data) {
+                //alert(data);
+            },
+            error: function(msg) {
+                //alert(msg);
+            }
+        });
+
+}
+
 ");
 
             // 注入.
             webBrowser.Document.Body.AppendChild(ele);
-            object result = webBrowser.Document.InvokeScript("GetPictureData");
-            
-
+            //object result = webBrowser.Document.InvokeScript("GetPictureData");
             //MessageBox.Show(buff.ToString());
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            webBrowser.Document.InvokeScript("PostData");
+        }
+
+        public void ShowMessage(string mess)
+        {
+            //MessageBox.Show(mess);
+            if (ConfigurationManager.AppSettings["over"] != "1")
+            {
+                ConfigurationManager.AppSettings["currentTime"] = DateTime.Now.ToString();
+                FillAnswer();
+            }
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
@@ -161,8 +240,10 @@ namespace WebBrowser
 
         private void webBrowser_ControlAdded(object sender, ControlEventArgs e)
         {
-            
+
         }
+
+
     }
 
     //private void btnInput_Click(object sender, EventArgs e)

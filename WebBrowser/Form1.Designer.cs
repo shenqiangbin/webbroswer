@@ -32,6 +32,9 @@
             this.webBrowser = new System.Windows.Forms.WebBrowser();
             this.txtUrl = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
+            this.textBoxA = new System.Windows.Forms.TextBox();
+            this.richTextBoxQ = new System.Windows.Forms.RichTextBox();
             this.SuspendLayout();
             // 
             // btnGo
@@ -49,10 +52,10 @@
             this.webBrowser.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.webBrowser.Location = new System.Drawing.Point(2, 29);
+            this.webBrowser.Location = new System.Drawing.Point(2, 30);
             this.webBrowser.MinimumSize = new System.Drawing.Size(20, 20);
             this.webBrowser.Name = "webBrowser";
-            this.webBrowser.Size = new System.Drawing.Size(1289, 690);
+            this.webBrowser.Size = new System.Drawing.Size(1289, 583);
             this.webBrowser.TabIndex = 2;
             this.webBrowser.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.webBrowser1_DocumentCompleted);
             this.webBrowser.Navigated += new System.Windows.Forms.WebBrowserNavigatedEventHandler(this.webBrowser_Navigated);
@@ -77,11 +80,39 @@
             this.label1.Text = "网址：";
             this.label1.Click += new System.EventHandler(this.label1_Click);
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(577, 0);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 5;
+            this.button1.Text = "发送请求";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click_1);
+            // 
+            // textBoxA
+            // 
+            this.textBoxA.Location = new System.Drawing.Point(884, 641);
+            this.textBoxA.Name = "textBoxA";
+            this.textBoxA.Size = new System.Drawing.Size(285, 21);
+            this.textBoxA.TabIndex = 6;
+            // 
+            // richTextBoxQ
+            // 
+            this.richTextBoxQ.Location = new System.Drawing.Point(2, 641);
+            this.richTextBoxQ.Name = "richTextBoxQ";
+            this.richTextBoxQ.Size = new System.Drawing.Size(876, 107);
+            this.richTextBoxQ.TabIndex = 7;
+            this.richTextBoxQ.Text = "";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1291, 750);
+            this.Controls.Add(this.richTextBoxQ);
+            this.Controls.Add(this.textBoxA);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.txtUrl);
             this.Controls.Add(this.webBrowser);
@@ -98,5 +129,8 @@
         private System.Windows.Forms.WebBrowser webBrowser;
         private System.Windows.Forms.TextBox txtUrl;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.TextBox textBoxA;
+        private System.Windows.Forms.RichTextBox richTextBoxQ;
     }
 }
